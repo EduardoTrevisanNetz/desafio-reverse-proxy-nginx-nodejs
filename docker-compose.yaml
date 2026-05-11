@@ -2,7 +2,7 @@ services:
   nginx-app:
     image: nginx:latest
     ports:
-      - "80:80"
+      - "8080:8080"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
@@ -12,8 +12,9 @@ services:
     build: ./node
     ports:
       - "3000:3000"
-  depends_on:
-      - mysql-app
+    depends_on:
+      mysql-app:
+        condition: service_healthy
   
   mysql-app:
     image: mysql:8
@@ -22,7 +23,11 @@ services:
       MYSQL_DATABASE: appdb
     volumes:
       - mysql-data:/var/lib/mysql
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   mysql-data:

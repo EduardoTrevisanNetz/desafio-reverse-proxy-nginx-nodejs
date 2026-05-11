@@ -9,12 +9,32 @@ const api_url = 'https://randomuser.me/api/?results=1'
 let connection
 
 
+async function connectWithRetry() {
+  while (true) {
+    try {
+      connection = await mysql.createConnection({
+        host: 'mysql-app',
+        user: 'root',
+        password: 'root',
+        database: 'appdb'
+      })
+
+      console.log('DB conectado')
+      return
+
+    } catch (err) {
+      console.log('Tentando conectar no DB...')
+      await new Promise(r => setTimeout(r, 2000))
+    }
+  }
+}
+
 async function findUser() {
 
   const response = await axios.get(api_url)
 
   return response.data.results.map(user => ({
-    nome: `${user.name.first} ${user.name.last}`
+    name: `${user.name.first} ${user.name.last}`
   }))
 }
 
@@ -43,12 +63,7 @@ function buildHtml(users) {
 
 async function start() {
 
-  connection = await mysql.createConnection({
-    host: 'mysql',
-    user: 'root',
-    password: 'root',
-    database: 'appdb'
-  })
+  await connectWithRetry()
 
   await connection.execute(`
     CREATE TABLE IF NOT EXISTS users (
@@ -70,7 +85,7 @@ app.get('/', async (req, res) => {
 
     await connection.execute(
       'INSERT INTO users(name) VALUES(?)',
-      [user[0].nome]
+      [user[0].name]
     )
 
     const [users] = await connection.execute(
