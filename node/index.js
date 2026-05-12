@@ -8,7 +8,6 @@ const api_url = 'https://randomuser.me/api/?results=1'
 
 let connection
 
-
 async function connectWithRetry() {
   while (true) {
     try {
@@ -19,11 +18,11 @@ async function connectWithRetry() {
         database: 'appdb'
       })
 
-      console.log('DB conectado')
+      console.log('Database connected')
       return
 
     } catch (err) {
-      console.log('Tentando conectar no DB...')
+      console.log('Retrying database connection...')
       await new Promise(r => setTimeout(r, 2000))
     }
   }
@@ -39,27 +38,27 @@ async function findUser() {
 }
 
 function buildHtml(users) {
-      let html = `
-      <html>
-        <body>
-          <h1>Full Cycle Rocks!</h1>
+  let html = `
+  <html>
+    <body>
+      <h1>Full Cycle Rocks!</h1>
 
-          <ul>
-    `
+      <ul>
+  `
 
-    users.forEach(user => {
-      html += `<li>-${user.name}</li>`
-    })
+  users.forEach(user => {
+    html += `<li>${user.name}</li>`
+  })
 
-    html += `
-          </ul>
+  html += `
+      </ul>
 
-        </body>
-      </html>
-    `
-    return html
+    </body>
+  </html>
+  `
+
+  return html
 }
-
 
 async function start() {
 
@@ -73,10 +72,9 @@ async function start() {
   `)
 
   app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000')
+    console.log('Server running on port 3000')
   })
 }
-
 
 app.get('/', async (req, res) => {
 
@@ -101,10 +99,9 @@ app.get('/', async (req, res) => {
     console.error(error)
 
     res.status(500).json({
-      erro: 'Erro ao buscar usuários'
+      error: 'Error fetching users'
     })
   }
 })
-
 
 start()
